@@ -1,36 +1,28 @@
-import React, { useState } from 'react';
-import Register from "./components/Register.jsx";
-import Login from "./components/Login.jsx";
-import Dashboard from "./components/Dashboard.jsx";
-import AttendanceTable from "./components/AttendanceTable.jsx";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/Login';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard';
+import NotFound from './components/NotFound';
+
 import './index.css';
 import './App.css';
 
+const isAuthenticated = true;
 
 export default function App() {
-  const [screen, setScreen] = useState('register');
-  const [user, setUser] = useState(null);
-
-  const navigate = (next) => setScreen(next);
-
+  
   return (
-    <>
-      {screen === 'register' && <Register onNext={() => navigate('login')} />}
-      {screen === 'login' && (
-        <Login
-          onLogin={(userData) => {
-            setUser(userData);
-            navigate('dashboard');
-          }}
-        />
-      )}
-      {screen === 'dashboard' && (
-        <Dashboard
-          user={user}
-          onNavigate={navigate}
-        />
-      )}
-      {screen === 'attendance' && <AttendanceTable onBack={() => navigate('dashboard')} />}
-    </>
+    <Router>
+      <Routes>
+        <Route path='/' element={isAuthenticated ? <Navigate to='/dashboard' /> : <Login />} />
+
+        <Route path='/register' element={<Register />} />
+
+        <Route path='/dashboard/*' element={isAuthenticated ? <Dashboard /> : <Navigate to='/' />} />
+
+        <Route path='*' element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }
