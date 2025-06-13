@@ -1,28 +1,56 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import Register from './components/Register';
-import Dashboard from './components/Dashboard';
-import NotFound from './components/NotFound';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Dashboard from "./components/Dashboard";
+import NotFound from "./components/NotFound";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-import './index.css';
-import './App.css';
+const PrivateRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/" />;
+};
 
-const isAuthenticated = true;
+const AppRoutes = () => {
+  const { isAuthenticated } = useAuth();
 
-export default function App() {
-  
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
+      />
+
+      <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/dashboard/*"
+        element={
+          <PrivateRoute>
+            {" "}
+            <Dashboard />
+          </PrivateRoute>
+        }
+      />
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+const App = () => {
   return (
     <Router>
-      <Routes>
-        <Route path='/' element={isAuthenticated ? <Navigate to='/dashboard' /> : <Login />} />
-
-        <Route path='/register' element={<Register />} />
-
-        <Route path='/dashboard/*' element={isAuthenticated ? <Dashboard /> : <Navigate to='/' />} />
-
-        <Route path='*' element={<NotFound />} />
-      </Routes>
+      <AuthProvider>
+        {" "}
+        <AppRoutes />
+      </AuthProvider>
     </Router>
   );
-}
+};
+
+export default App;
